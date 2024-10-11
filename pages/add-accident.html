@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report Accident</title>
+    <style>
+      #map {
+        height: 400px;
+        width: 100%;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #11101d; /* Dark background color */
+        color: #ffffff; /* White text color */
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #1d1b31; /* Dark purple background color */
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        background: #693fed; /* Purple background */
+        border-left: 20px solid #000000; /* Black border */
+        box-shadow: 0px 2px 10px rgba(202, 201, 201, 0); /* Shadow */
+        color: #dd2525; /* Red text color */
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.7em;
+        padding: 10px;
+        text-align: center;
+        user-select: none;
+      }
+      form {
+        display: grid;
+        gap: 10px;
+      }
+      label {
+        font-weight: 600;
+        color: #ffffff; /* White text color */
+      }
+      input[type="text"],
+      input[type="date"],
+      input[type="time"],
+      input[type="number"],
+      select {
+        width: calc(100% - 20px);
+        padding: 8px;
+        border: 1px solid #22e957; /* Purple border */
+        border-radius: 4px;
+        font-size: 14px;
+        color: #ffffff; /* White text color */
+        background-color: #1d1b31; /* Dark purple background color */
+      }
+      input[type="submit"] {
+        background-color: #693fed; /* Purple button background color */
+        color: #ffffff; /* White text color */
+        border: none;
+        padding: 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      input[type="submit"]:hover {
+        background-color: #512ed3; /* Darker purple on hover */
+      }
+      input:invalid {
+        border-color: #dd2525; /* Red border color for invalid input */
+      }
+      input:invalid + span {
+        color: #dd2525; /* Red text color for validation message */
+        font-size: 12px;
+        margin-left: 5px;
+      }
+      input:valid + span {
+        color: #4caf50; /* Green text color for validation message */
+        font-size: 12px;
+        margin-left: 5px;
+      }
+      .mark-button {
+        background-color: #693fed;
+        color: #ffffff;
+        border: none;
+        padding: 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+      .mark-button.clicked {
+        background-color: #32d455; /* Different color when clicked */
+      }
+      .mark-button:hover {
+        background-color: #522ed3; /* Darker purple on hover */
+      }
+      select#severity:invalid,
+      select#accidentType:invalid {
+        border-color: white; /* White border for invalid selection */
+      }
+      select#severity:valid,
+      select#accidentType:valid {
+        border-color: green; /* Green border for valid selection */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Add Accident on Map</h2>
+      <div id="map"></div>
+      <button class="mark-button" id="markLocation" required>
+        Mark Location
+      </button>
+      <form id="accidentForm">
+        <label for="location">Location</label>
+        <input type="text" id="location" name="location" required />
+
+        <label for="date">Date</label>
+        <input type="date" id="date" name="date" required />
+
+        <label for="time">Time</label>
+        <input type="time" id="time" name="time" required />
+
+        <label for="severity">Severity</label>
+        <select id="severity" name="severity" required>
+          <option value="" disabled selected>Select severity</option>
+          <option value="minor">Minor</option>
+          <option value="moderate">Moderate</option>
+          <option value="severe">Severe</option>
+        </select>
+
+        <label for="vehicles">Number of Vehicles Involved</label>
+        <input type="number" id="vehicles" name="vehicles" required />
+
+        <label for="accidentType">Type of Accident</label>
+        <select id="accidentType" name="accidentType" required>
+          <option value="" disabled selected>Select accident type</option>
+          <option value="collision">Collision</option>
+          <option value="rollover">Rollover</option>
+          <option value="single-vehicle">Single Vehicle</option>
+          <option value="pedestrian">Pedestrian</option>
+          <option value="other">Other</option>
+        </select>
+
+        <div id="otherAccidentTypeContainer" style="display: none">
+          <label for="otherAccidentType">Specify Other Accident Type</label>
+          <input type="text" id="otherAccidentType" name="otherAccidentType" />
+        </div>
+
+        <input type="hidden" id="latitude" name="latitude" required />
+        <input type="hidden" id="longitude" name="longitude" required />
+
+        <input type="submit" value="Report Accident" />
+      </form>
+    </div>
+
+    <script>
+      let map;
+      let centerMarker;
+      let locationMarked = false;
+
+      function initMap() {
+        const defaultLocation = { lat: -34.397, lng: 150.644 };
+
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: defaultLocation,
+          zoom: 8,
+        });
+
+        centerMarker = new google.maps.Marker({
+          position: map.getCenter(),
+          map: map,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "#FF0000",
+            fillOpacity: 0.8,
+            strokeWeight: 2,
+            strokeColor: "#FFFFFF",
+          },
+        });
+
+        map.addListener("idle", () => {
+          centerMarker.setPosition(map.getCenter());
+        });
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              };
+              map.setCenter(userLocation);
+              map.setZoom(15);
+            },
+            () => {
+              console.error("Geolocation service failed.");
+            }
+          );
+        } else {
+          console.error("Your browser doesn't support geolocation.");
+        }
+
+        document
+          .getElementById("markLocation")
+          .addEventListener("click", function () {
+            const currentCenter = map.getCenter();
+            centerMarker.setPosition(currentCenter);
+            document.getElementById("latitude").value = currentCenter.lat();
+            document.getElementById("longitude").value = currentCenter.lng();
+            document.getElementById("location").value = "";
+            locationMarked = true;
+            updateMarkButtonStyle();
+          });
+      }
+
+      function updateMarkButtonStyle() {
+        const markButton = document.getElementById("markLocation");
+        if (locationMarked) {
+          markButton.classList.add("clicked");
+        } else {
+          markButton.classList.remove("clicked");
+        }
+      }
+
+      document
+        .getElementById("accidentForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          if (!locationMarked) {
+            alert("Please mark the location on the map.");
+            return;
+          }
+
+          var formData = new FormData(this);
+          var jsonData = {};
+          formData.forEach(function (value, key) {
+            jsonData[key] = value;
+          });
+
+          fetch("/api/report-accident", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(jsonData),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) {
+                alert(data.error);
+              } else {
+                alert("Accident reported successfully!");
+                document.getElementById("accidentForm").reset();
+                locationMarked = false;
+                updateMarkButtonStyle();
+                window.location.href = "home.html";
+              }
+            })
+            .catch((error) => {
+              console.error("Error reporting accident:", error);
+              alert("Error reporting accident. Please try again.");
+            });
+        });
+
+      window.onload = function () {
+        initMap();
+
+        const now = new Date();
+        const date = now.toISOString().split("T")[0];
+        const time = now.toTimeString().split(" ")[0].substring(0, 5);
+
+        document.getElementById("date").value = date;
+        document.getElementById("time").value = time;
+      };
+
+      document
+        .getElementById("severity")
+        .addEventListener("change", function () {
+          if (this.value) {
+            this.style.borderColor = "#32d455";
+          } else {
+            this.style.borderColor = "white";
+          }
+        });
+
+      document
+        .getElementById("accidentType")
+        .addEventListener("change", function () {
+          if (this.value) {
+            this.style.borderColor = "#32d455";
+          } else {
+            this.style.borderColor = "white";
+          }
+
+          const otherAccidentTypeContainer = document.getElementById(
+            "otherAccidentTypeContainer"
+          );
+          if (this.value === "other") {
+            otherAccidentTypeContainer.style.display = "block";
+            document
+              .getElementById("otherAccidentType")
+              .setAttribute("required", "required");
+          } else {
+            otherAccidentTypeContainer.style.display = "none";
+            document
+              .getElementById("otherAccidentType")
+              .removeAttribute("required");
+          }
+        });
+    </script>
+    <script
+      async
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-62X22O2e-Y0K4ppAZ9rGSjpjK8Rlkws&callback=initMap"
+    ></script>
+  </body>
+</html>

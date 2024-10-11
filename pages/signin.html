@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: #000;
+      }
+      .wrapper {
+        width: 400px;
+        padding: 40px;
+        background: #000;
+        box-shadow: 0 0 50px rgb(255, 0, 0);
+        border-radius: 20px;
+      }
+      h2 {
+        font-size: 30px;
+        color: #fff;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .input-group {
+        position: relative;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #fff;
+      }
+      .input-group label {
+        position: absolute;
+        top: 50%;
+        left: 5px;
+        transform: translateY(-50%);
+        font-size: 16px;
+        color: #fff;
+        transition: 0.3s;
+      }
+      .input-group input {
+        width: 100%;
+        height: 40px;
+        font-size: 16px;
+        color: #fff;
+        background: transparent;
+        border: none;
+        outline: none;
+        padding: 0 5px;
+      }
+      .input-group input:focus ~ label,
+      .input-group input:valid ~ label {
+        top: -5px;
+      }
+      button {
+        width: 100%;
+        height: 40px;
+        background: rgb(99, 164, 245);
+        box-shadow: 0 0 10px #0ef;
+        font-size: 16px;
+        color: #000;
+        font-weight: 500;
+        cursor: pointer;
+        border-radius: 30px;
+        border: none;
+        outline: none;
+        margin-bottom: 20px;
+      }
+      .signUp-link {
+        text-align: center;
+      }
+      .signUp-link a {
+        color: rgb(8, 80, 196);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .signUp-link a:hover {
+        text-decoration: underline;
+      }
+      #loginError {
+        color: red;
+        display: none;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <form id="loginForm">
+        <h2>Sign In</h2>
+        <div class="input-group">
+          <input type="text" id="loginIdentifier" required />
+          <label for="loginIdentifier">Username or Email</label>
+        </div>
+        <div class="input-group">
+          <input type="password" id="loginPassword" required />
+          <label for="loginPassword">Password</label>
+        </div>
+        <button type="submit">Sign In</button>
+        <div class="signUp-link">
+          <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+        </div>
+        <div id="loginError">Incorrect username or password</div>
+      </form>
+    </div>
+  
+    <script>
+      async function hashPassword(password) {
+        try {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(password);
+          const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        } catch (error) {
+          console.error("Hashing error:", error);
+          throw new Error("Password hashing failed");
+        }
+      }
+  
+      document.getElementById("loginForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const identifier = document.getElementById("loginIdentifier").value;
+        const password = document.getElementById("loginPassword").value;
+  
+        try {
+          const hashedPassword = await hashPassword(password);
+  
+          const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ identifier, password: hashedPassword }),
+          });
+  
+          const data = await response.json();
+  
+          if (data.username) {
+            localStorage.setItem("loginIdentifier", data.username); // Store username in localStorage
+            window.location.href = "home.html"; // Redirect to home page
+          } else {
+            const loginError = document.getElementById("loginError");
+            loginError.style.display = "block";
+            loginError.innerText = data.error;
+          }
+        } catch (error) {
+          console.error("Login error:", error);
+          const loginError = document.getElementById("loginError");
+          loginError.style.display = "block";
+          loginError.innerText = "An error occurred during login";
+        }
+      });
+    </script>
+  </body>
+</html>

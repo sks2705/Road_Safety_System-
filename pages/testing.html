@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #000;
+        }
+        .scramble-text {
+            position: absolute;
+          }
+          
+          .scramble-text > span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+          }
+          
+          .scramble-text > span > span {
+            display: inline-block;
+            transition: transform 10s;
+          }
+        .wrapper {
+            position: relative;
+            width: 400px;
+            height: 500px;
+            background: #000;
+            box-shadow: 0 0 50px rgb(255, 0, 0);
+            border-radius: 20px;
+            padding: 40px;
+            overflow: hidden;
+        }
+        .form-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+        }
+        .wrapper.active .form-wrapper.sign-in {
+            transform: translateY(-450px);
+        }
+        .wrapper .form-wrapper.sign-up {
+            position: absolute;
+            top: 450px;
+            left: 0;
+        }
+        .wrapper.active .form-wrapper.sign-up {
+            transform: translateY(-450px);
+        }
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            text-align: center;
+        }
+        .input-group {
+            position: relative;
+            margin: 30px 0;
+            border-bottom: 2px solid #fff;
+        }
+        .input-group label {
+            position: absolute;
+            top: 50%;
+            left: 5px;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #fff;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+        .input-group input {
+            width: 320px;
+            height: 40px;
+            font-size: 16px;
+            color: #fff;
+            padding: 0 5px;
+            background: transparent;
+            border: none;
+            outline: none;
+        }
+        .input-group input:focus ~ label,
+        .input-group input:valid ~ label {
+            top: -5px;
+        }
+        button {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            background: rgb(99, 164, 245);
+            box-shadow: 0 0 10px #0ef;
+            font-size: 16px;
+            color: #000;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 30px;
+            border: none;
+            outline: none;
+        }
+        .signUp-link {
+            font-size: 14px;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .signUp-link p {
+            color: #fff;
+        }
+        .signUp-link p a {
+            color: rgb(8, 80, 196);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .signUp-link p a:hover {
+            text-decoration: underline;
+        }
+        /* Password reveal styles */
+        .input-group .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            color: #fff;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .input-group .password-toggle svg {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="form-wrapper sign-in">
+            <form id="loginForm">
+                <h2>Sign In</h2>
+                <div class="input-group">
+                    <input type="text" id="loginIdentifier" required>
+                    <label for="loginIdentifier">Username or Email</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="loginPassword" required>
+                    <label for="loginPassword">Password</label>
+                    <span class="password-toggle" onclick="togglePasswordVisibility()">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C6.48 2 2 7.16 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" fill="currentColor"/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-1.71 0-3 1.39-3 3s1.29 3 3 3 3-1.39 3-3-1.29-3-3-3z" fill="currentColor"/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 6c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5S12.83 6 12 6z" fill="currentColor"/>
+                        </svg>
+                    </span>
+                </div>
+                <button type="submit">Sign In</button>
+                <div class="signUp-link">
+                    <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+                </div>
+                <div id="loginError" style="color: red; display: none;">Incorrect username or password</div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+      const scrambleTextPlugin = {
+        scrambleText: {
+            chars: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~,.<>?/;:"][}{+_)(*&^%$#@!±=-§',
+            text: '' // You can initialize text here if needed
+        }
+    };
+    
+    function scrambleText(element, options) {
+        const chars = options.chars;
+        const text = options.text; // Ensure this text is set appropriately
+        
+        // Create a proxy element if not already created
+        const proxy = element.querySelector('.scramble-text');
+        if (!proxy) {
+            console.error('Proxy element not found.');
+            return;
+        }
+        
+        const scramble = () => {
+            let scrambledText = '';
+            for (let i = 0; i < text.length; i++) {
+                scrambledText += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            proxy.innerText = scrambledText;
+        };
+        
+        // Initial scramble
+        scramble();
+    
+        // Optionally, you might want to scramble periodically (commented out here)
+        // setInterval(scramble, 100);
+    }
+    
+    // Usage:
+    const input = document.getElementById('loginPassword');
+    scrambleText(input, scrambleTextPlugin.scrambleText);
+    
+        
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('loginPassword');
+            const toggleIcon = document.querySelector('.password-toggle svg');
+        
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.style.color = '#0ef'; // Change eye icon color when revealing password
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.style.color = '#fff'; // Change eye icon color when hiding password
+            }
+        }
+        
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const identifier = document.getElementById('loginIdentifier').value;
+            const password = document.getElementById('loginPassword').value;
+        
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ identifier, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.username) {
+                    localStorage.setItem('username', data.username);
+                    window.location.href = 'home.html';
+                } else {
+                    const loginError = document.getElementById('loginError');
+                    loginError.style.display = 'block';
+                    loginError.innerText = data.error;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

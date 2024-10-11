@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; /* Changed to flex-start to allow scrolling */
+        min-height: 100vh;
+        background: #000;
+        padding: 20px; /* Added padding to body */
+        overflow-y: auto; /* Enable vertical scrolling on body */
+      }
+
+      .wrapper {
+        position: relative;
+        width: 400px;
+        height: 690px; /* Increased the height of the wrapper */
+        background: #000;
+        box-shadow: 0 0 50px rgb(255, 0, 0);
+        border-radius: 20px;
+        padding: 40px;
+        overflow-y: auto; /* Ensure the wrapper itself is scrollable */
+      }
+
+      /* Autofill Styles */
+      input:-webkit-autofill {
+        background-color: #333 !important; /* Set your desired background color */
+        color: #ffffff00 !important; /* Set your desired text color */
+      }
+
+      input:-moz-autofill {
+        background-color: #333 !important; /* Set your desired background color */
+        color: #ffffff00 !important; /* Set your desired text color */
+      }
+
+      input:-ms-autofill {
+        background-color: #333 !important; /* Set your desired background color */
+        color: #ffffff00 !important; /* Set your desired text color */
+      }
+
+      input:-webkit-autofill:focus,
+      input:-moz-autofill:focus,
+      input:-ms-autofill:focus {
+        background-color: #333 !important; /* Set your desired background color */
+        color: #ffffff00 !important; /* Set your desired text color */
+      }
+
+      /* Generic autofill */
+      input:-autofill {
+        background-color: #333 !important; /* Set your desired background color */
+        color: #ffffff00 !important; /* Set your desired text color */
+      }
+
+      .form-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        transition: 1s ease-in-out;
+      }
+
+      .form-wrapper.sign-up {
+        position: relative;
+        top: 0;
+        left: 0;
+      }
+
+      h2 {
+        font-size: 30px;
+        color: #fff;
+        text-align: center;
+      }
+
+      .input-group {
+        position: relative;
+        margin: 30px 0;
+        border-bottom: 2px solid #fff;
+      }
+
+      .input-group label {
+        position: absolute;
+        top: 50%;
+        left: 5px;
+        transform: translateY(-50%);
+        font-size: 16px;
+        color: #fff;
+        pointer-events: none;
+        transition: 0.3s ease;
+      }
+
+      .input-group input {
+        width: 320px;
+        height: 40px;
+        font-size: 16px;
+        color: #fff;
+        padding: 0 5px;
+        background: transparent;
+        border: none;
+        outline: none;
+      }
+
+      .input-group input:focus ~ label,
+      .input-group input:valid ~ label {
+        top: -5px;
+      }
+
+      .remember {
+        margin: -5px 0 15px 5px;
+      }
+
+      .remember label {
+        color: #fff;
+        font-size: 14px;
+      }
+
+      .remember label input {
+        accent-color: rgb(114, 13, 13);
+      }
+
+      button {
+        position: relative;
+        width: 100%;
+        height: 40px;
+        background: rgb(99, 164, 245);
+        box-shadow: 0 0 10px #0ef;
+        font-size: 16px;
+        color: #000;
+        font-weight: 500;
+        cursor: pointer;
+        border-radius: 30px;
+        border: none;
+        outline: none;
+      }
+
+      .signIn-link {
+        font-size: 14px;
+        text-align: center;
+        margin: 15px 0;
+      }
+
+      .signIn-link p {
+        color: #fff;
+      }
+
+      .signIn-link p a {
+        color: rgb(8, 80, 196);
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .signIn-link a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="form-wrapper sign-up">
+        <form id="signupForm">
+          <h2>Sign Up</h2>
+          <div class="input-group">
+            <input type="text" id="signupName" required />
+            <label for="signupName">Name</label>
+          </div>
+          <div class="input-group">
+            <input type="text" id="signupUsername" required />
+            <label for="signupUsername">Username</label>
+          </div>
+          <div class="input-group">
+            <input type="email" id="signupEmail" required />
+            <label for="signupEmail">Email</label>
+          </div>
+          <div class="input-group">
+            <input type="password" id="signupPassword" required />
+            <label for="signupPassword">Password</label>
+          </div>
+          <div class="input-group">
+            <input type="text" id="signupContact" required />
+            <label for="signupContact">Contact</label>
+          </div>
+          <div class="input-group">
+            <input type="text" id="signupAddress" required />
+            <label for="signupAddress">Address</label>
+          </div>
+          <button type="submit">Sign Up</button>
+          <div class="signIn-link">
+            <p>Already have an account? <a href="signin.html">Sign In</a></p>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script>
+      async function hashPassword(password) {
+        try {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(password);
+          const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        } catch (error) {
+          console.error("Hashing error:", error);
+          throw new Error("Password hashing failed");
+        }
+      }
+
+      document
+        .getElementById("signupForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const name = document.getElementById("signupName").value;
+          const username = document.getElementById("signupUsername").value;
+          const email = document.getElementById("signupEmail").value;
+          const password = document.getElementById("signupPassword").value;
+          const contact = document.getElementById("signupContact").value;
+          const address = document.getElementById("signupAddress").value;
+
+          try {
+            const hashedPassword = await hashPassword(password);
+
+            const response = await fetch("/api/signup", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name,
+                username,
+                email,
+                password: hashedPassword,
+                contact,
+                address,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (data.message) {
+              alert("Signup successful!");
+              window.location.href = "signin.html";
+            } else {
+              alert(data.error);
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred during signup");
+          }
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Accidents</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        background: #3b024e;
+        color: #ffffff;
+        padding: 20px;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      body.light-mode {
+        background-color: #ffffff;
+        color: #000000;
+      }
+      .wrapper {
+        width: 100%;
+        max-width: 800px;
+        padding: 20px;
+        background: #000;
+        box-shadow: 0 0 50px rgb(255, 0, 0);
+        border-radius: 20px;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .wrapper.light-mode {
+        background-color: #f0f0f0;
+        color: #000000;
+      }
+      h1 {
+        font-size: 30px;
+        color: #fff;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      h1.light-mode {
+        color: #000;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+        background-color: #33273a;
+        color: #ffffff;
+      }
+      table.light-mode {
+        background-color: #f0f0f0;
+        color: #000000;
+      }
+      th,
+      td {
+        border: 1px solid #ffffff;
+        text-align: left;
+        padding: 10px;
+      }
+      th {
+        background-color: hsl(0, 78%, 57%);
+      }
+      tr:nth-child(even) {
+        background-color: #a64ac9;
+      }
+      tr:nth-child(even).light-mode {
+        background-color: #dcdcdc;
+      }
+      .toggle-mode {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: #0e0101;
+        border: none;
+        color: inherit;
+        font-size: 12px;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 30px;
+        box-shadow: 0 0 10px #0ef;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .toggle-mode.light-mode {
+        background-color: #f0f0f0;
+        color: #000;
+      }
+    </style>
+  </head>
+  <body class="dark-mode">
+    <h1 class="dark-mode">View Accidents</h1>
+    <button class="toggle-mode dark-mode" onclick="toggleMode()">Toggle Dark Mode</button>
+    <div class="wrapper dark-mode">
+      <table class="dark-mode">
+        <thead>
+          <tr>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Severity</th>
+            <th>Vehicles Involved</th>
+          </tr>
+        </thead>
+        <tbody id="accidents-table-body"></tbody>
+      </table>
+    </div>
+
+    <script>
+      function toggleMode() {
+        document.body.classList.toggle('light-mode');
+        document.querySelector('.wrapper').classList.toggle('light-mode');
+        document.querySelector('h1').classList.toggle('light-mode');
+        document.querySelector('button').classList.toggle('light-mode');
+        document.querySelector('table').classList.toggle('light-mode');
+        document.querySelectorAll('tr:nth-child(even)').forEach((row) => {
+          row.classList.toggle('light-mode');
+        });
+      }
+
+      fetch('/api/accidents')
+        .then((response) => response.json())
+        .then((data) => {
+          const tableBody = document.getElementById('accidents-table-body');
+
+          data.forEach((accident) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${accident.location}</td>
+              <td>${accident.date}</td>
+              <td>${accident.time}</td>
+              <td>${accident.severity}</td>
+              <td>${accident.vehicles}</td>
+            `;
+            tableBody.appendChild(row);
+          });
+        })
+        .catch((error) => {
+          console.error('Error fetching accidents:', error);
+          alert('Failed to fetch accident data. Please try again.');
+        });
+    </script>
+  </body>
+</html>
